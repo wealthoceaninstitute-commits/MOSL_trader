@@ -1,12 +1,31 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import api from '@/lib/api'
 import type { MofslClient } from '@/types'
 import clsx from 'clsx'
 
 const inputCls = 'w-full bg-navy-900 border border-navy-700 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-brand-500 transition'
 const labelCls = 'block text-xs text-slate-400 mb-1 font-medium'
+
+function FormField({ label, field, type = 'text', placeholder = '', required = false, value, onChange }: {
+  label: string; field: string; type?: string; placeholder?: string; required?: boolean
+  value: string; onChange: (field: string, value: string) => void
+}) {
+  return (
+    <div>
+      <label className={labelCls}>{label}{required && <span className="text-red-400 ml-1">*</span>}</label>
+      <input
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(field, e.target.value)}
+        className={inputCls}
+      />
+    </div>
+  )
+}
 
 interface ClientFormData {
   name: string
@@ -190,21 +209,9 @@ export default function ClientsTab() {
     } catch { /* ignore */ }
   }
 
-  const F = ({ label, field, type = 'text', placeholder = '', required = false }: {
-    label: string; field: keyof ClientFormData; type?: string; placeholder?: string; required?: boolean
-  }) => (
-    <div>
-      <label className={labelCls}>{label}{required && <span className="text-red-400 ml-1">*</span>}</label>
-      <input
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        value={form[field]}
-        onChange={e => setForm(prev => ({ ...prev, [field]: e.target.value }))}
-        className={inputCls}
-      />
-    </div>
-  )
+  const handleFieldChange = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }))
+  }
 
   return (
     <div className="bg-navy-800 border border-navy-700 rounded-xl p-4">
@@ -284,16 +291,16 @@ export default function ClientsTab() {
               <button onClick={() => { setShowModal(false); pollingRef.current = true }} className="text-slate-400 hover:text-white text-xl">×</button>
             </div>
             <form onSubmit={handleSubmit} className="p-4 space-y-3">
-              <F label="Display Name" field="name" placeholder="e.g. Rahul MOFSL" />
-              <F label="Client ID" field="client_id" placeholder="MOFSL client ID" required />
-              <F label="API Key" field="api_key" type="password" placeholder="API key" />
-              <F label="API Secret" field="api_secret" type="password" placeholder="API secret" />
-              <F label="TOTP Secret" field="totp_secret" type="password" placeholder="TOTP secret key" />
-              <F label="Password Hash (SHA256 of password+api_key)" field="password_hash" type="password" placeholder="SHA256 hash" />
-              <F label="2FA / DOB (DD/MM/YYYY)" field="two_fa" placeholder="e.g. 01/01/1990" />
+              <FormField label="Display Name" field="name" placeholder="e.g. Rahul MOFSL" value={form.name} onChange={handleFieldChange} />
+              <FormField label="Client ID" field="client_id" placeholder="MOFSL client ID" required value={form.client_id} onChange={handleFieldChange} />
+              <FormField label="API Key" field="api_key" type="password" placeholder="API key" value={form.api_key} onChange={handleFieldChange} />
+              <FormField label="API Secret" field="api_secret" type="password" placeholder="API secret" value={form.api_secret} onChange={handleFieldChange} />
+              <FormField label="TOTP Secret" field="totp_secret" type="password" placeholder="TOTP secret key" value={form.totp_secret} onChange={handleFieldChange} />
+              <FormField label="Password" field="password_hash" type="password" placeholder="MOFSL login password" value={form.password_hash} onChange={handleFieldChange} />
+              <FormField label="PAN" field="two_fa" placeholder="e.g. ABCDE1234F" value={form.two_fa} onChange={handleFieldChange} />
               <div className="grid grid-cols-2 gap-3">
-                <F label="Capital" field="capital" type="number" placeholder="100000" />
-                <F label="Qty Multiplier" field="qty_multiplier" type="number" placeholder="1" />
+                <FormField label="Capital" field="capital" type="number" placeholder="100000" value={form.capital} onChange={handleFieldChange} />
+                <FormField label="Qty Multiplier" field="qty_multiplier" type="number" placeholder="1" value={form.qty_multiplier} onChange={handleFieldChange} />
               </div>
 
               <div className="flex gap-2 pt-2">
