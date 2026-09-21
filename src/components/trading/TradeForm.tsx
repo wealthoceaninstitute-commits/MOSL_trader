@@ -8,6 +8,45 @@ import type { MofslClient, ClientGroup, SymbolResult } from '@/types'
 
 const FORM_STORAGE_KEY = 'woi-trade-form-v1'
 
+function RadioGroup({ name, options, value, onChange }: {
+  name: string
+  options: { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
+}) {
+  return (
+    <div className="flex items-center flex-wrap gap-3">
+      {options.map(o => (
+        <label key={o.value} className="flex items-center gap-1.5 cursor-pointer select-none">
+          <input
+            type="radio"
+            name={name}
+            checked={value === o.value}
+            onChange={() => onChange(o.value)}
+            className="accent-brand-500"
+          />
+          <span className="text-sm text-slate-200">{o.label}</span>
+        </label>
+      ))}
+    </div>
+  )
+}
+
+function CheckBox({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <label className="flex items-center gap-1.5 cursor-pointer select-none">
+      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="accent-brand-500 w-4 h-4" />
+      <span className="text-sm text-slate-200">{label}</span>
+    </label>
+  )
+}
+
+function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`border-b border-navy-700 py-3 px-1 ${className}`}>{children}</div>
+  )
+}
+
 const onlyDigits = (v: string) => (v ?? '').replace(/[^\d]/g, '')
 const toIntOr = (v: string | number, fallback = 1): number => {
   const n = parseInt(String(v), 10)
@@ -227,39 +266,6 @@ export default function TradeForm() {
     setPrice(0); setTrigPrice(0); setDisclosedQty(0); setTimeForce('DAY'); setAmo(false)
     setSelectedClients([]); setSelectedGroups([]); setPerClientQty({}); setPerGroupQty({})
   }
-
-  const RadioGroup = ({ name, options, value, onChange }: {
-    name: string
-    options: { value: string; label: string }[]
-    value: string
-    onChange: (v: string) => void
-  }) => (
-    <div className="flex items-center flex-wrap gap-3">
-      {options.map(o => (
-        <label key={o.value} className="flex items-center gap-1.5 cursor-pointer select-none">
-          <input
-            type="radio"
-            name={name}
-            checked={value === o.value}
-            onChange={() => onChange(o.value)}
-            className="accent-brand-500"
-          />
-          <span className="text-sm text-slate-200">{o.label}</span>
-        </label>
-      ))}
-    </div>
-  )
-
-  const CheckBox = ({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) => (
-    <label className="flex items-center gap-1.5 cursor-pointer select-none">
-      <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)} className="accent-brand-500 w-4 h-4" />
-      <span className="text-sm text-slate-200">{label}</span>
-    </label>
-  )
-
-  const Section = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (
-    <div className={`border-b border-navy-700 py-3 px-1 ${className}`}>{children}</div>
-  )
 
   return (
     <div className="bg-navy-800 border border-navy-700 rounded-xl p-4">
