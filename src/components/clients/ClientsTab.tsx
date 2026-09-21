@@ -77,7 +77,7 @@ export default function ClientsTab() {
   const statusDot = (c: MofslClient) => {
     const isLogging = loggingIn.has(c.id)
     if (isLogging) return <span className="inline-flex items-center gap-1"><span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" /><span className="text-yellow-400 text-xs">logging in…</span></span>
-    if (c.session_active) return <span className="inline-flex items-center gap-1"><span className="w-2 h-2 bg-green-400 rounded-full" /><span className="text-green-400 text-xs">Live</span></span>
+    if (c.is_live || c.session_active) return <span className="inline-flex items-center gap-1"><span className="w-2 h-2 bg-green-400 rounded-full" /><span className="text-green-400 text-xs">Live</span></span>
     return <span className="inline-flex items-center gap-1"><span className="w-2 h-2 bg-slate-500 rounded-full" /><span className="text-slate-400 text-xs">Offline</span></span>
   }
 
@@ -132,7 +132,7 @@ export default function ClientsTab() {
         const list: MofslClient[] = res.data?.clients || res.data || []
         setClients(list)
         const hit = list.find(c => c.id === id)
-        if (hit?.session_active) break
+        if (hit?.is_live || hit?.session_active) break
       } catch { /* ignore */ }
       tries++
       await new Promise(res => setTimeout(res, 1000))
@@ -177,8 +177,8 @@ export default function ClientsTab() {
       await api.post(`/clients/${id}/login`)
       pollUntilLoggedIn(id)
     } catch (e) {
-      const err = e as { message?: string }
-      alert('Login failed: ' + err.message)
+      const err = e as { response?: { data?: { detail?: string } }; message?: string }
+      alert('Login failed: ' + (err.response?.data?.detail || err.message))
     }
   }
 
@@ -197,8 +197,8 @@ export default function ClientsTab() {
       await api.post('/clients/login-all')
       clients.forEach(c => pollUntilLoggedIn(c.id))
     } catch (e) {
-      const err = e as { message?: string }
-      alert('Login all failed: ' + err.message)
+      const err = e as { response?: { data?: { detail?: string } }; message?: string }
+      alert('Login all failed: ' + (err.response?.data?.detail || err.message))
     }
   }
 
